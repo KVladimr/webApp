@@ -1,12 +1,16 @@
 <template>
   <v-layout column>
     <div class="side-panel">
-    <h1>SidePanel</h1>
-    <h1>SidePanel</h1>
-    <h1>SidePanel</h1>
-    <h1>SidePanel</h1>
+      <v-btn
+        dark
+        class="indigo darken-2 add-post-btn"
+        :to="{
+          name: 'CreatePost'
+        }">
+        Добавить пост
+      </v-btn>
     
-  </div>
+    </div>
   </v-layout>
 </template>
 
@@ -21,10 +25,8 @@ export default {
 </script>
 
 <style scoped>
-/* .side-panel {
-  width: 300px;
-  height: 100%;
-  float: right;
-  background-color: green;
-} */
+.add-post-btn {
+  width: 100%;
+  margin: 2px 2px 2px 2px;
+}
 </style>

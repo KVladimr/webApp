@@ -12,9 +12,12 @@ export default {
     return Api().get(`posts/${postId}`)
   },
   post (post) {
-    return Api().post('posts', post)
+    return Api().post('posts/new', post)
   },
   put (post) {
     return Api().put(`posts/${post.id}`, post)
+  },
+  showPage (pageId) {
+    return Api().get(`page/${pageId}`)
   }
 }

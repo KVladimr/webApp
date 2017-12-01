@@ -61,15 +61,16 @@ export default {
   methods: {
     async login () {
       try {
-        await AuthenticationService.login({ // const response =
-          userName: this.userName,
+        const response = await AuthenticationService.login({
+          name: this.userName,
           password: this.password
         })
-        // this.$store.dispatch('setToken', response.data.token)
-        // this.$store.dispatch('setUser', response.data.user)
-        // this.$router.push({
-        //   name: 'songs'
-        // })
+        this.$store.dispatch('setToken', response.data.token)
+        this.$store.dispatch('setUser', response.data.user)
+        this.$emit('close')
+        this.$router.push({
+          name: 'Home'
+        })
       } catch (error) {
         this.error = error.response.data.error
       }

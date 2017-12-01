@@ -2,12 +2,12 @@
 <v-layout column>
   <div class="user-info">
     <div class="avatar11">
-      <img src="../assets/logo.png">
+      <img :src="user.avatar">
     </div>
     <div class="user-info-text">
-      <h1>{{user.userName}}</h1>
+      <h1>{{user.name}}</h1>
       <p>Дата регистрации: {{user.regDate}}</p>
-      <p>Постов: {{user.numPosts}}</p>
+      <p>Постов: {{user.postsCount}}</p>
     </div>
   </div>
   <hr>
@@ -21,15 +21,22 @@ export default {
   data () {
     return {
       user: {
-        userName: 'default Name',
-        regDate: 'test date',
-        numPosts: 9000
+        name: null,
+        regDate: 'пока не реализовано',
+        postsCount: null,
+        // avatar: null
+        avatar: `../assets/logo.png`
       }
     }
   },
   async mounted () {
-    const userId = this.route.params.userId
+    const userId = this.$route.params.id
     this.user = (await UsersService.show(userId)).data
+  },
+  async beforeRouteUpdate (to, from, next) {
+    const userId = to.params.id
+    this.user = (await UsersService.show(userId)).data
+    next()
   }
   // props: [
   //   'userName','regDate', 'numPosts'

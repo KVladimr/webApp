@@ -22,7 +22,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-toolbar-items>
+      <v-toolbar-items v-if="!$store.state.isUserLoggedIn">
         <v-btn 
           @click="showLoginForm = true; showRegisterForm = false"
           flat 
@@ -36,10 +36,12 @@
           dark>
           Регистрация
         </v-btn>
-        
+      </v-toolbar-items>
+      <v-toolbar-items v-if="$store.state.isUserLoggedIn">
         <v-btn 
           flat 
-          dark>
+          dark
+          @click="logout">
           Выйти
         </v-btn>
       </v-toolbar-items>
@@ -69,16 +71,16 @@ export default {
   components: {
     RegisterForm,
     LoginForm
+  },
+  methods: {
+    logout () {
+      this.$store.dispatch('setToken', null)
+      this.$store.dispatch('setUser', null)
+      this.$router.push({
+        name: 'Home'
+      })
+    }
   }
-//   methods: {
-//     // logout () {
-//     //   this.$store.dispatch('setToken', null)
-//     //   this.$store.dispatch('setUser', null)
-//     //   this.$router.push({
-//     //     name: 'songs'
-//     //   })
-//     //}
-//   }
 }
 </script>
 

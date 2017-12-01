@@ -1,14 +1,28 @@
 <template>
   <v-layout column>
     <div class="post-info">
-      <h1>{{post.title}}</h1>
-      <span>{{post.creator}}</span>
-      <span>{{post.creationDate}}</span>
+      <router-link 
+        class="ref title-ref"
+        tag="h1"
+        :to="{
+          path: `/post/${post.post_id}`
+        }">
+        {{post.title}}
+      </router-link>
+      <router-link 
+        class="ref creator-ref"
+        tag="span"
+        :to="{
+          path: `/user/${post.creator_id}`
+        }">
+        {{post.creator_name}}
+      </router-link>
+      <span>{{post.creation_date}}</span>
       <v-layout>
         <tag 
           v-for="tag in post.tags"
-          :key="tag"
-          :tagName="tag">
+          :key="tag.name"
+          :tagName="tag.name || tag">
         </tag>
       </v-layout>
     </div>
@@ -48,5 +62,14 @@ export default {
 }
 .post-text {
   text-align: left;
+}
+.ref {
+  cursor: pointer;
+}
+.creator-ref:hover {
+  color: blue;
+}
+.title-ref:hover {
+  color: #666;
 }
 </style>

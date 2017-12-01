@@ -18,12 +18,6 @@
               ></v-text-field>
               <br>
               <v-text-field
-                label="Email"
-                type="email"
-                v-model="email"
-              ></v-text-field>
-              <br>
-              <v-text-field
                 label="Пароль"
                 type="password"
                 v-model="password"
@@ -61,7 +55,6 @@ export default {
   data () {
     return {
       userName: '',
-      email: '',
       password: '',
       error: null
     }
@@ -69,16 +62,16 @@ export default {
   methods: {
     async register () {
       try {
-        await AuthenticationService.register({  // const response =
-          userName: this.userName,
-          email: this.email,
+        const response = await AuthenticationService.register({
+          name: this.userName,
           password: this.password
         })
-        // this.$store.dispatch('setToken', response.data.token)
-        // this.$store.dispatch('setUser', response.data.user)
-        // this.$router.push({
-        //   name: 'songs'
-        // })
+        this.$store.dispatch('setToken', response.data.token)
+        this.$store.dispatch('setUser', response.data.user)
+        this.$emit('close')
+        this.$router.push({
+          name: 'Home'
+        })
       } catch (error) {
         this.error = error.response.data.error
       }

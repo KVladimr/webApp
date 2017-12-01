@@ -14,7 +14,7 @@
       </main>
       <v-footer class="pa-3">
         <v-spacer></v-spacer>
-        <div>какой-то текст</div>
+        <div>Footer</div>
       </v-footer>
     </v-app>
   </div>
@@ -23,19 +23,12 @@
 <script>
 import PageHeader from '@/components/Header.vue'
 import SidePanel from '@/components/SidePanel.vue'
-// import RegisterForm from '@/components/RegisterForm.vue'
 
 export default {
-  // data () {
-  //   return {
-  //     showRegisterForm: false
-  //   }
-  // },
   name: 'app',
   components: {
     PageHeader,
     SidePanel
-    // RegisterForm
   }
 }
 </script>
