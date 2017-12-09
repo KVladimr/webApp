@@ -64,7 +64,6 @@ export default {
       post: {
         title: null,
         text: null,
-        creator_id: null,
         image: null,
         tags: []
       },
@@ -80,11 +79,10 @@ export default {
         this.error = 'Необходима авторизация'
         return
       }
-      this.post.creator_id = this.$store.state.user.user_id
       const filledFields = Object
         .keys(this.post)
         .filter(key => !!this.post[key])
-      if (filledFields.length < 4) {
+      if (filledFields.length < 3) {
         this.error = 'Не все поля заполнены'
         return
       }
@@ -93,8 +91,9 @@ export default {
         this.$router.push({
           name: 'ViewPost',
           params: { id: response.data.post_id }
-        }) // мб на этот пост лучше
+        })
       } catch (err) {
+        this.error = err.response.data.message
         console.log(err)
       }
     },

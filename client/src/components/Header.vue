@@ -12,14 +12,6 @@
         </router-link>
       </v-toolbar-title>
 
-      <v-toolbar-items>
-        <v-btn 
-          flat 
-          dark>
-          Browse
-        </v-btn>
-      </v-toolbar-items>
-
       <v-spacer></v-spacer>
 
       <v-toolbar-items v-if="!$store.state.isUserLoggedIn">

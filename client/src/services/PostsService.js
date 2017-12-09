@@ -17,7 +17,11 @@ export default {
   put (post) {
     return Api().put(`posts/${post.id}`, post)
   },
-  showPage (pageId) {
-    return Api().get(`page/${pageId}`)
+  showPage (page) {
+    if (page.tag) {
+      return Api().get(`page/${page.page}?tag=${page.tag}`)
+    } else {
+      return Api().get(`page/${page.page}`)
+    }
   }
 }

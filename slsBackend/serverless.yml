@@ -13,48 +13,66 @@ provider:
   runtime: nodejs6.10
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-      - http:
-          path: users/create
-          method: get
   createNewPost:
-    handler: handler.createNewPost
+    handler: src/postsController.createNewPost
     events:
       - http:
           path: /posts/new
           method: post
           cors: true
   register:
-    handler: handler.register
+    handler: src/authenticationController.register
     events:
       - http:
           path: /register
           method: post
           cors: true
   login:
-    handler: handler.login
+    handler: src/authenticationController.login
     events:
       - http:
           path: /login
           method: post
           cors: true
   findPostById:
-    handler: handler.findPostById
+    handler: src/postsController.findPostById
     events:
       - http:
           path: /posts/{id}
           method: get
+          cors: true
   findUserById:
-    handler: handler.findUserById
+    handler: src/usersController.findUserById
     events:
       - http:
           path: /users/{id}
           method: get
+          cors: true
   showPageOfPosts:
-    handler: handler.showPageOfPosts
+    handler: src/postsController.showPageOfPosts
     events:
       - http:
           path: /page/{number}
           method: get
+          cors: true
+  saveNote:
+    handler: src/notesController.saveNote
+    events:
+      - http:
+          path: /notes/save
+          method: post
+          cors: true
+  deleteNote:
+    handler: src/notesController.deleteNote
+    events:
+      - http:
+          path: /notes/delete/{number}
+          method: get
+          cors: true
+  updateUserInfo:
+    handler: src/usersController.updateUserInfo
+    events:
+      - http:
+          path: /users/update
+          method: put
+          cors: true

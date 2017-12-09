@@ -11,6 +11,10 @@ export default {
   ],
   methods: {
     func () {
+      this.$router.push({
+        path: '/',
+        query: { tag: this.tagName }
+      })
     }
   }
 }

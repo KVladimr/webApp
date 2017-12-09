@@ -1,5 +1,5 @@
 <template>
-  <v-layout column>
+  <v-layout column class="whole-post">
     <div class="post-info">
       <router-link 
         class="ref title-ref"
@@ -49,12 +49,16 @@ export default {
 </script>
 
 <style scoped>
+.whole-post {
+  margin: 0 0 15px 0;
+}
 .post-info {  
   text-align: left;
 }
 .post-image {
   width: 100%;
   border: 1px solid #ccc;
+  padding: 0 3px 0 3px;
 }
 .post-image img {
   width: 100%;
@@ -62,6 +66,7 @@ export default {
 }
 .post-text {
   text-align: left;
+  padding: 3px;
 }
 .ref {
   cursor: pointer;
