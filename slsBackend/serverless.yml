@@ -76,3 +76,10 @@ functions:
           path: /users/update
           method: put
           cors: true
+  getFrequentTags:
+    handler: src/postsController.getFrequentTags
+    events:
+      - http:
+          path: /tags/frequent
+          method: get
+          cors: true

@@ -33,6 +33,15 @@
         <v-btn 
           flat 
           dark
+          :to="{
+            name: 'User',
+            params: {id: $store.state.user.user_id}
+          }">
+          Мой профиль
+        </v-btn>
+        <v-btn 
+          flat 
+          dark
           @click="logout">
           Выйти
         </v-btn>

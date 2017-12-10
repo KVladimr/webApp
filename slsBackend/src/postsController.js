@@ -188,3 +188,41 @@ module.exports.createNewPost = async (event, context, callback) => {
     }
     pool.end();
   };
+
+  module.exports.getFrequentTags = async (event, context, callback) => {    
+    const getFrequentTagsText = 'SELECT count(tags.tag_id), tags.name FROM post_tag, tags\
+    WHERE post_tag.tag_id = tags.tag_id GROUP BY tags.tag_id ORDER BY count DESC LIMIT 15;';
+    var response = {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: {}
+    };
+  
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
+    });
+  
+    const client = await pool.connect();
+  
+    try {
+      var resp = await client.query(getFrequentTagsText);
+      response.body.tags = resp.rows;
+      response.body = JSON.stringify(response.body); 
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Не удалось получить список тегов.',
+        })
+      });
+    } finally {
+      client.release();
+    }
+    pool.end();
+  };

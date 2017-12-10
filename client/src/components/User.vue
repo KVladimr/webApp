@@ -1,53 +1,58 @@
 <template>
-  <v-layout column>
-    <div class="user-info">
-      <div class="avatar11">
-        <img :src="avatarComp">
+  <div>
+    <v-layout column v-if="!error">
+      <div class="user-info">
+        <div class="avatar11">
+          <img :src="avatarComp">
+        </div>
+        <div class="user-info-text">
+          <h1>{{user.name}}</h1>
+          <p>Дата регистрации: {{user.creation_date}}</p>
+          <p>Постов: {{user.postsCount}}</p>
+        </div>
       </div>
-      <div class="user-info-text">
-        <h1>{{user.name}}</h1>
-        <p>Дата регистрации: {{user.creation_date}}</p>
-        <p>Постов: {{user.postsCount}}</p>
+      <div class="testt">
+        <v-dialog v-model="dialog" persistent max-width="700px">
+          <v-btn
+            v-if="$store.state.isUserLoggedIn && $store.state.user.user_id == $route.params.id"
+            class="add-note-button"
+            color="indigo darken-2"
+            slot="activator"
+            dark
+            small>
+            Редактировать
+          </v-btn>
+          <v-card>
+            <v-card-title>
+              <span class="headline">Редактировать</span>
+            </v-card-title>
+            <v-card-text>
+              <v-container grid-list-md>
+                <v-layout wrap>
+                  <v-flex xs12>
+                    <v-text-field v-model="tempAvatarURL" label="URL изображения"></v-text-field>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="indigo darken-2" dark @click.native="saveInformation">Сохранить</v-btn>
+              <v-btn color="indigo darken-2" dark @click.native="dialog = false; tempAvatarURL = user.avatar">Отмена</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </div>
-    </div>
-    <div class="testt">
-      <v-dialog v-model="dialog" persistent max-width="700px">
-        <v-btn
-          v-if="$store.state.user.user_id == $route.params.id"
-          class="add-note-button"
-          color="indigo darken-2"
-          slot="activator"
-          dark
-          small>
-          Редактировать
-        </v-btn>
-        <v-card>
-          <v-card-title>
-            <span class="headline">Редактировать</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container grid-list-md>
-              <v-layout wrap>
-                <v-flex xs12>
-                  <v-text-field v-model="tempAvatarURL" label="URL изображения"></v-text-field>
-                </v-flex>
-              </v-layout>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="indigo darken-2" dark @click.native="saveInformation">Сохранить</v-btn>
-            <v-btn color="indigo darken-2" dark @click.native="dialog = false; tempAvatarURL = user.avatar">Отмена</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </div>
-    <hr>
-    <note
-      v-if="$store.state.isUserLoggedIn && $store.state.user.user_id != $route.params.id"
-      :note="note"
-    ></note>
-  </v-layout>
+      <hr>
+      <note
+        v-if="$store.state.isUserLoggedIn && $store.state.user.user_id != $route.params.id"
+        :note="note"
+      ></note>
+    </v-layout>
+    <v-layout column v-else>
+      <h3>{{error}}</h3>
+    </v-layout>
+  </div>
 </template>
 
 <script>
@@ -57,6 +62,7 @@ import Note from '@/components/Note.vue'
 export default {
   data () {
     return {
+      error: null,
       dialog: false,
       tempAvatarURL: null,
       note: {
@@ -91,23 +97,33 @@ export default {
     }
   },
   async mounted () {
-    this.note = {notetext: ''}
-    const userId = this.$route.params.id
-    const response = (await UsersService.show(userId)).data
-    this.user = response.user
-    this.tempAvatarURL = this.user.avatar
-    if (response.note) {
-      this.note = response.note
+    try {
+      this.note = {notetext: ''}
+      const userId = this.$route.params.id
+      const response = (await UsersService.show(userId)).data
+      this.user = response.user
+      this.tempAvatarURL = this.user.avatar
+      if (response.note) {
+        this.note = response.note
+      }
+      this.error = null
+    } catch (error) {
+      this.error = error.response.data.message
     }
   },
   async beforeRouteUpdate (to, from, next) {
-    this.note = {notetext: ''}
-    const userId = to.params.id
-    const response = (await UsersService.show(userId)).data
-    this.user = response.user
-    this.tempAvatarURL = this.user.avatar
-    if (response.note) {
-      this.note = response.note
+    try {
+      this.note = {notetext: ''}
+      const userId = to.params.id
+      const response = (await UsersService.show(userId)).data
+      this.user = response.user
+      this.tempAvatarURL = this.user.avatar
+      if (response.note) {
+        this.note = response.note
+      }
+      this.error = null
+    } catch (error) {
+      this.error = error.response.data.error
     }
     next()
   },
