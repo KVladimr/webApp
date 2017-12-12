@@ -19,40 +19,51 @@ module.exports.findUserById = async (event, context, callback) => {
     },
     body: {}
   };
-
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  const client = await pool.connect();
-
-  try {
-    var resp = await client.query(findUserText, [id]);
-    response.body.user = resp.rows[0];
-    resp = await client.query(countPostsText, [id]);
-    response.body.user.postsCount = resp.rows[0].count;
-    if (userID && userID !== id) {
-      resp = await client.query(findNotesText, [userID, id]);
-      response.body.note = {
-        notetext: resp.rows.length > 0 ? resp.rows[0].content : ''
-      };
+  try{
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
+    });
+  
+    const client = await pool.connect();
+  
+    try {
+      var resp = await client.query(findUserText, [id]);
+      response.body.user = resp.rows[0];
+      resp = await client.query(countPostsText, [id]);
+      response.body.user.postsCount = resp.rows[0].count;
+      if (userID && userID !== id) {
+        resp = await client.query(findNotesText, [userID, id]);
+        response.body.note = {
+          notetext: resp.rows.length > 0 ? resp.rows[0].content : ''
+        };
+      }
+      response.body = JSON.stringify(response.body);
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Такого пользователя не существует.',
+        })
+      });
+    } finally {
+      client.release();
     }
-    response.body = JSON.stringify(response.body);
-    callback(null, response);
+    pool.end();
   } catch (err) {
     callback(null, {
-      statusCode: 404,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Такого пользователя не существует.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release();
   }
-  pool.end();
 };
 
 module.exports.updateUserInfo = async (event, context, callback) => {
@@ -82,31 +93,43 @@ module.exports.updateUserInfo = async (event, context, callback) => {
     body: {}
   };
 
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  const client = await pool.connect();
-
   try {
-    await client.query(deleteNoteText, [user.avatar, userID]);
-    response.body = JSON.stringify({
-      message: 'Информация о пользователе обновлена.',
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
     });
 
-    callback(null, response);
+    const client = await pool.connect();
+
+    try {
+      await client.query(deleteNoteText, [user.avatar, userID]);
+      response.body = JSON.stringify({
+        message: 'Информация о пользователе обновлена.',
+      });
+
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Ошибка при обновлении информации о пользователе.',
+        })
+      });
+    } finally {
+      client.release();
+    }
+    pool.end();
   } catch (err) {
     callback(null, {
-      statusCode: 400,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Ошибка при обновлении информации о пользователе.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release();
   }
-  pool.end();
 };

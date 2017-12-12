@@ -62,7 +62,7 @@ import Note from '@/components/Note.vue'
 export default {
   data () {
     return {
-      error: null,
+      error: 'Загрузка...',
       dialog: false,
       tempAvatarURL: null,
       note: {
@@ -123,7 +123,7 @@ export default {
       }
       this.error = null
     } catch (error) {
-      this.error = error.response.data.error
+      this.error = error.response.data.message
     }
     next()
   },
@@ -161,5 +161,6 @@ export default {
 }
 .testt {
   text-align: left;
+  width: 100%;
 }
 </style>

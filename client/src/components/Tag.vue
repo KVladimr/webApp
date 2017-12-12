@@ -21,5 +21,7 @@ export default {
 </script>
 
 <style scoped>
-
+.tag :hover {
+cursor: pointer;
+}
 </style>

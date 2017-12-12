@@ -84,6 +84,10 @@ export default {
       this.tempNotetext = this.note.notetext
     }
   },
+  mounted () {
+    this.showNote = !!(this.note.notetext.trim())
+    this.tempNotetext = this.note.notetext
+  },
   methods: {
     async save () {
       try {
@@ -97,15 +101,12 @@ export default {
       } catch (error) {
         console.log('error: ' + error)
       }
-      // проверить на сохранение пустых строк
-      // отправить текст заметки на сервер, создать или обновить запись в базе, очистить временную строку
     },
     async deleteNote () {
       try {
         const targetId = this.$route.params.id
         const response = (await NotesService.delete(targetId)).data
         this.note = {notetext: ''}
-        // куда выводить сообщение об удалении?
         this.isTestareaEditable = false
         console.log('message: ' + response.message)
       } catch (error) {
@@ -142,7 +143,7 @@ export default {
   padding: 3px;
 }
 .note-textarea {
-  resize: none;
+  resize: vertical;
   width: 100%;
 }
 .note-buttons {

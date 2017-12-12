@@ -64,7 +64,7 @@ export default {
       post: {
         title: null,
         text: null,
-        image: null,
+        image: '',
         tags: []
       },
       error: null,
@@ -85,6 +85,9 @@ export default {
       if (filledFields.length < 3) {
         this.error = 'Не все поля заполнены'
         return
+      }
+      if (this.post.image.trim() === '') {
+        this.post.image = false
       }
       try {
         const response = await PostsService.post(this.post)

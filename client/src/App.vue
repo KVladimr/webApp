@@ -51,20 +51,17 @@ export default {
 .page {
   margin: 20px 0;
   width: 100%;
-  /* background-color: pink; */
 }
 .wrapper {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   position: relative;
   padding: 0 20px;
-  min-height: 600px;
-  /* background-color: green; */
+  min-height: 300px;
 }
 .content-wrapper {
   float: left;
   width: 100%;
-  /* background-color: red; */
 }
 .main-side-panel {
   position: relative;
@@ -73,14 +70,12 @@ export default {
   float: right;
   overflow: hidden;
   min-height: 600px;
-  border: 2px solid #777;
-  /* background-color: yellow; */
+  border: 2px solid #eee;
 }
 .content {
   margin-right: 320px;
   clear: both;
   overflow: auto;
   min-height: 400px;
-  /* background-color: blueviolet; */
 }
 </style>

@@ -5,9 +5,32 @@ const Promise = require('bluebird');
 const bcrypt = Promise.promisifyAll(require('bcrypt-nodejs'));
 const config = require('./config/config');
 const jwtFunctions = require('./supportFunctions/jwtFunctions');
+const Joi = require('joi');
 
 module.exports.register = (event, context, callback) => {
   const user = JSON.parse(event.body);
+  const schema = {
+    name: Joi.string().regex(
+      new RegExp('^[a-zA-Z0-9]{4,20}$')
+    ),
+    password: Joi.string().regex(
+      new RegExp('^[a-zA-Z0-9]{5,32}$')
+    )
+  };
+
+  const result = Joi.validate(user, schema);
+  if (result.error) {
+    callback(null, {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: JSON.stringify({
+        error: 'Неверный формат данных',
+      })
+    });
+    return;
+  }
 
   const SALT_FACTOR = 8
 
