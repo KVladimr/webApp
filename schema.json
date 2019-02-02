@@ -1,0 +1,15 @@
+{
+  "title":"registerInfo",
+  "type":"object", 
+  "properties":{ 
+    "name":{ 
+      "type":"string", 
+      "pattern": "^[a-zA-Z0-9]{4,20}$"
+    }, 
+    "password":{ 
+      "type":"string", 
+      "pattern": "^[a-zA-Z0-9]{4,20}$"
+    }
+  }, 
+  "required": ["name", "password"] 
+}

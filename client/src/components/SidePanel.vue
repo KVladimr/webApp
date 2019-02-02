@@ -41,8 +41,12 @@ export default {
     }
   },
   async mounted () {
-    const response = (await PostsService.getTags()).data
-    this.tags = response.tags
+    try {
+      const response = (await PostsService.getTags()).data
+      this.tags = response.tags
+    } catch (error) {
+      console.log('error' + error)
+    }
   }
 }
 </script>

@@ -68,45 +68,57 @@ module.exports.createNewPost = async (event, context, callback) => {
     SELECT tag_id FROM s';
   const insertPostTagText = 'INSERT INTO post_tag(post_id, tag_id) VALUES($1, $2)';
 
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  var tagsID = [];
-
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN')
-    const resp = await client.query(insertPostText, values)
-
-    for (var tag in post.tags) {
-      tagsID[tagsID.length] = await client.query(insertTagText, [post.tags[tag]])
-      await client.query(insertPostTagText, [resp.rows[0].post_id, tagsID[tagsID.length - 1].rows[0].tag_id])
-    }
-
-    await client.query('COMMIT')
-    callback(null, {
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*"
-      },
-      body: JSON.stringify(resp.rows[0])
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
     });
+
+    var tagsID = [];
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN')
+      const resp = await client.query(insertPostText, values)
+
+      for (var tag in post.tags) {
+        tagsID[tagsID.length] = await client.query(insertTagText, [post.tags[tag]])
+        await client.query(insertPostTagText, [resp.rows[0].post_id, tagsID[tagsID.length - 1].rows[0].tag_id])
+      }
+
+      await client.query('COMMIT')
+      callback(null, {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify(resp.rows[0])
+      });
+    } catch (err) {
+      await client.query('ROLLBACK')
+      callback(null, {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Ошибка. Не удалось добавить пост.',
+        })
+      });
+    } finally {
+      client.release()
+    }
+    pool.end();
   } catch (err) {
-    await client.query('ROLLBACK')
     callback(null, {
-      statusCode: 400,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Ошибка. Не удалось добавить пост.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release()
   }
-  pool.end();
 };
 
 module.exports.findPostById = async (event, context, callback) => {
@@ -122,33 +134,45 @@ module.exports.findPostById = async (event, context, callback) => {
     }
   };
 
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  const client = await pool.connect();
-
   try {
-    var resp = await client.query(findPostText, [id]);
-    response.body = resp.rows[0];
-    resp = await client.query(findTagsText, [id]);
-    response.body.tags = resp.rows;
-    response.body = JSON.stringify(response.body); 
-    callback(null, response);
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
+    });
+
+    const client = await pool.connect();
+
+    try {
+      var resp = await client.query(findPostText, [id]);
+      response.body = resp.rows[0];
+      resp = await client.query(findTagsText, [id]);
+      response.body.tags = resp.rows;
+      response.body = JSON.stringify(response.body); 
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Пост не найден.',
+        })
+      });
+    } finally {
+      client.release();
+    }
+    pool.end();
   } catch (err) {
     callback(null, {
-      statusCode: 404,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Пост не найден.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release();
   }
-  pool.end();
 };
 
 module.exports.showPageOfPosts = async (event, context, callback) => {
@@ -176,47 +200,59 @@ module.exports.showPageOfPosts = async (event, context, callback) => {
     }
   };
 
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  const client = await pool.connect();
-
   try {
-    var resp;
-    if (tag) {
-      resp = await client.query(getPostsOnPageWithTagText, [tag, limit, (page - 1) * limit]);
-      response.body = {posts: resp.rows};
-      resp = await client.query(countPostsWithTagText, [tag]);
-      response.body.numPages = Math.ceil(resp.rows[0].count / limit);
-    } else {
-      resp = await client.query(getPostsOnPageText, [limit, (page - 1) * limit]);
-      response.body = {posts: resp.rows};
-      resp = await client.query(countPostsText);
-      response.body.numPages = Math.ceil(resp.rows[0].count / limit);
-    }
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
+    });
 
-    for (var i = 0; i < response.body.posts.length; i++) {
-      resp = await client.query(findTagsText, [response.body.posts[i].post_id]);
-      response.body.posts[i].tags = resp.rows;
-    }
+    const client = await pool.connect();
 
-    response.body = JSON.stringify(response.body);  
-    callback(null, response);
+    try {
+      var resp;
+      if (tag) {
+        resp = await client.query(getPostsOnPageWithTagText, [tag, limit, (page - 1) * limit]);
+        response.body = {posts: resp.rows};
+        resp = await client.query(countPostsWithTagText, [tag]);
+        response.body.numPages = Math.ceil(resp.rows[0].count / limit);
+      } else {
+        resp = await client.query(getPostsOnPageText, [limit, (page - 1) * limit]);
+        response.body = {posts: resp.rows};
+        resp = await client.query(countPostsText);
+        response.body.numPages = Math.ceil(resp.rows[0].count / limit);
+      }
+
+      for (var i = 0; i < response.body.posts.length; i++) {
+        resp = await client.query(findTagsText, [response.body.posts[i].post_id]);
+        response.body.posts[i].tags = resp.rows;
+      }
+
+      response.body = JSON.stringify(response.body);  
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Страница не найдена.',
+        })
+      });
+    } finally {
+      client.release();
+    }
+    pool.end();
   } catch (err) {
     callback(null, {
-      statusCode: 400,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Страница не найдена.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release();
   }
-  pool.end();
 };
 
 module.exports.getFrequentTags = async (event, context, callback) => {    
@@ -229,30 +265,42 @@ module.exports.getFrequentTags = async (event, context, callback) => {
     },
     body: {}
   };
-
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  const client = await pool.connect();
-
+  
   try {
-    var resp = await client.query(getFrequentTagsText);
-    response.body.tags = resp.rows;
-    response.body = JSON.stringify(response.body); 
-    callback(null, response);
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
+    });
+
+    const client = await pool.connect();
+
+    try {
+      var resp = await client.query(getFrequentTagsText);
+      response.body.tags = resp.rows;
+      response.body = JSON.stringify(response.body); 
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Не удалось получить список тегов.',
+        })
+      });
+    } finally {
+      client.release();
+    }
+    pool.end();
   } catch (err) {
     callback(null, {
-      statusCode: 400,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Не удалось получить список тегов.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release();
   }
-  pool.end();
 };

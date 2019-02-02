@@ -7,7 +7,7 @@
         </div>
         <div class="user-info-text">
           <h1>{{user.name}}</h1>
-          <p>Дата регистрации: {{user.creation_date}}</p>
+          <p>Дата регистрации: {{user.creation_date.substr(0,16).replace('T',' ')}}</p>
           <p>Постов: {{user.postsCount}}</p>
         </div>
       </div>
@@ -93,6 +93,7 @@ export default {
         this.dialog = false
       } catch (error) {
         console.log('error' + error)
+        alert(error.message)
       }
     }
   },

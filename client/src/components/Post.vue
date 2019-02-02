@@ -17,7 +17,7 @@
         }">
         {{post.creator_name}}
       </router-link>
-      <span>{{post.creation_date}}</span>
+      <span>{{post.creation_date.substr(0,16).replace('T',' ')}}</span>
       <v-layout>
         <tag 
           v-for="tag in post.tags"

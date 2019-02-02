@@ -32,32 +32,44 @@ module.exports.saveNote = async (event, context, callback) => {
     body: {}
   };
 
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  const client = await pool.connect();
-
   try {
-    var resp = await client.query(saveOrUpdateNoteText, [userID, note.content, note.targetId]);
-    response.body = resp.rows[0];
-    response.body = JSON.stringify(response.body);
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
+    });
 
-    callback(null, response);
+    const client = await pool.connect();
+
+    try {
+      var resp = await client.query(saveOrUpdateNoteText, [userID, note.content, note.targetId]);
+      response.body = resp.rows[0];
+      response.body = JSON.stringify(response.body);
+
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Не удалось добавить заметку.',
+        })
+      });
+    } finally {
+      client.release();
+    }
+    pool.end();
   } catch (err) {
     callback(null, {
-      statusCode: 400,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Не удалось добавить заметку.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release();
   }
-  pool.end();
 };
 
 module.exports.deleteNote = async (event, context, callback) => {
@@ -86,31 +98,43 @@ module.exports.deleteNote = async (event, context, callback) => {
     body: {}
   };
 
-  const pool = new pg.Pool({
-    connectionString: config.connectionString
-  });
-
-  const client = await pool.connect();
-
   try {
-    await client.query(deleteNoteText, [userID, target_id]);
-    response.body = JSON.stringify({
-      message: 'Заметка удалена.',
+    const pool = new pg.Pool({
+      connectionString: config.connectionString
     });
 
-    callback(null, response);
+    const client = await pool.connect();
+
+    try {
+      await client.query(deleteNoteText, [userID, target_id]);
+      response.body = JSON.stringify({
+        message: 'Заметка удалена.',
+      });
+
+      callback(null, response);
+    } catch (err) {
+      callback(null, {
+        statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify({
+          message: 'Не удалось удалить заметку.',
+        })
+      });
+    } finally {
+      client.release();
+    }
+    pool.end();
   } catch (err) {
     callback(null, {
-      statusCode: 400,
+      statusCode: 500,
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
-        message: 'Не удалось удалить заметку.',
+        message: 'Соединение с базой данных не установлено.',
       })
     });
-  } finally {
-    client.release();
   }
-  pool.end();
 };
